@@ -10,22 +10,37 @@ import sys
 import cv2
 import os
 
+def getzoomout(image):
+    
+    row, col= image.shape[:2]
+    bordersize=100
+    border=cv2.copyMakeBorder(image, top=bordersize, bottom=bordersize, left=bordersize,
+                              right=bordersize, borderType= cv2.BORDER_CONSTANT,
+                              value=[0,255,0] )
+    return border
+
 def video2images(inputvideofile,outputimagesfolder):
        vidcap = cv2.VideoCapture(inputvideofile)
-       returnvalue,image = vidcap.read() #returns true/fals and an image
+       returnvalue,image = vidcap.read() #returns true/false and an image
        count = 0
        while returnvalue:
+         returnvalue,image = vidcap.read()   
+         if returnvalue==False:
+             break
          filename=os.path.join(outputimagesfolder,"image%d.jpg" % count)
-         cv2.imwrite(filename, image)     # save frame as JPEG/png file      
-         returnvalue,image = vidcap.read()
+#         image=getzoomout(image)         
+         cv2.imwrite(filename, image)     # save frame as JPEG/png file   
          print('Read next frame: ', returnvalue)
          cv2.imshow('video',image)
-         if (cv2.waitKey(1) & 0xFF) == ord('q'): # Hit `q` to exit
+
+         if (cv2.waitKey(1) & 0xFF) == ord('q'): # Hit `q` to exit\
              break
+             
          count += 1
+       vidcap.release()  
        cv2.destroyAllWindows()
-       print('Completed Saving video frames')
-       
+       print('\nCompleted Saving video frames to',outputimagesfolder)
+
 def main(argv):
    ap = argparse.ArgumentParser()
    ap.add_argument("-i", "--input", required=True,  help="Input video file ")
@@ -35,9 +50,8 @@ def main(argv):
    inputvideofile = args['input']
    outputimagesfolder = args['output'] 
    
-   
-#   inputvideofile = 'popeye3.mp4'  #Specify imput video file here
-#   outputimagesfolder = r'C:\SAI\IIIT\2019_Spring' #Path to target images folder
+#   inputvideofile = 'popeye3.mp4' 
+#   outputimagesfolder=r' C:\SAI\IIIT\2019_Spring\images' 
    video2images(inputvideofile,outputimagesfolder)
 
    
